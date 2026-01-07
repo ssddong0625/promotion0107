@@ -3,42 +3,48 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-
-public abstract class MoveStretegy
+public interface IMoveStretegy
 {
-    protected NavMeshAgent agent;
-    public void SetAgent(NavMeshAgent agent)
+    void MoveSpeed(NavMeshAgent agent);
+}
+public class MoveManager
+{
+    IMoveStretegy moveStretegy;
+    public void SetStretegy(IMoveStretegy ms)
     {
-        this.agent = agent;
+        moveStretegy = ms;
     }
-    public abstract void moveSpeed();
+    public void MoveSpeed(NavMeshAgent agent)
+    {
+        moveStretegy.MoveSpeed(agent);
+    }
 }
 
-public class MoveOneStepStretegy : MoveStretegy
+public class MoveOneStepStretegy : IMoveStretegy
 {
-    public override void moveSpeed()
+    public void MoveSpeed(NavMeshAgent agent)
     {
         agent.speed = 10f;
     }
 }
-public class MoveTwoStepStretegy : MoveStretegy
+public class MoveTwoStepStretegy : IMoveStretegy
 {
-    public override void moveSpeed()
+    public void MoveSpeed(NavMeshAgent agent)
     {
         agent.speed = 20f;
     }
 }
 
-public class MoveThreeStepStretegy : MoveStretegy
+public class MoveThreeStepStretegy : IMoveStretegy
 {
-    public override void moveSpeed()
+    public void MoveSpeed(NavMeshAgent agent)
     {
         agent.speed = 30f;
     }
 }
-public class MoveNormalStretegy : MoveStretegy
+public class MoveNormalStretegy : IMoveStretegy
 {
-    public override void moveSpeed()
+    public void MoveSpeed(NavMeshAgent agent)
     {
         agent.speed = 5f;
     }
@@ -48,7 +54,7 @@ public class Move : MonoBehaviour
     [SerializeField]
     private Camera cam;
     private NavMeshAgent agent;
-    MoveStretegy moveStretegy;
+    public MoveManager moveManager;
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -68,14 +74,14 @@ public class Move : MonoBehaviour
     }
     private void Start()
     {
-        moveStretegy = new MoveNormalStretegy();
+        moveManager = new MoveManager();
+        moveManager.SetStretegy(new MoveNormalStretegy());
         moveSpeed();
 
     }
     public void moveSpeed()
     {
-        moveStretegy.SetAgent(agent);
-        moveStretegy.moveSpeed();
+        moveManager.MoveSpeed(agent);
     }
     void Moving()
     {
@@ -91,22 +97,22 @@ public class Move : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             Debug.Log("속도 1단계");
-            moveStretegy = new MoveOneStepStretegy();
+            moveManager.SetStretegy(new MoveOneStepStretegy());
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             Debug.Log("속도 2단계");
-            moveStretegy = new MoveTwoStepStretegy();
+            moveManager.SetStretegy(new MoveTwoStepStretegy());
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             Debug.Log("속도 3단계");
-            moveStretegy = new MoveThreeStepStretegy();
+            moveManager.SetStretegy(new MoveThreeStepStretegy());
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
             Debug.Log("속도 기본 단계");
-            moveStretegy = new MoveNormalStretegy();
+            moveManager.SetStretegy(new MoveNormalStretegy());
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
